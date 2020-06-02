@@ -24,40 +24,39 @@ class SaleOrder(models.Model):
     def margin_edit_change(self):
         if not self.margin_global_product:
             self.margin_global_product = self.margin_global_edit
-            self.margin_product_edit_change()
+            self.margin_product_edit_change(ignore_update_sale_margin=True)
         if not self.margin_global_service:
             self.margin_global_service = self.margin_global_edit
-            self.margin_service_edit_change()
+            self.margin_service_edit_change(ignore_update_sale_margin=True)
+        self._product_margin()
 
     @api.onchange('margin_global_product')
-    def margin_product_edit_change(self):
+    def margin_product_edit_change(self, ignore_update_sale_margin=False):
         has_change = False
         for line in self.order_line:
             if line.product_id.type != "service" and not line.margin_lock:
-                marge_percent = self.margin_global_product / 100
-                if line.purchase_price:
-                    line.margin_edit = marge_percent * line.purchase_price
-                else:
-                    line.margin_edit = marge_percent
-                line.price_unit = line.purchase_price + line.margin_edit
+                self._update_line_margin_edit(line)
                 has_change = True
-        if has_change:
+        if not ignore_update_sale_margin and has_change:
             self._product_margin()
 
     @api.onchange('margin_global_service')
-    def margin_service_edit_change(self):
+    def margin_service_edit_change(self, ignore_update_sale_margin=False):
         has_change = False
         for line in self.order_line:
             if line.product_id.type == "service" and not line.margin_lock:
-                marge_percent = self.margin_global_service / 100
-                if line.purchase_price:
-                    line.margin_edit = marge_percent * line.purchase_price
-                else:
-                    line.margin_edit = marge_percent
-                line.price_unit = line.purchase_price + line.margin_edit
+                self._update_line_margin_edit(line)
                 has_change = True
-        if has_change:
-            self._product_margin()
+            if not ignore_update_sale_margin and has_change:
+                self._product_margin()
+
+    def _update_line_margin_edit(self, line):
+        marge_percent = self.margin_global_product / 100
+        if line.purchase_price:
+            line.margin_edit = marge_percent * line.purchase_price
+        else:
+            line.margin_edit = marge_percent
+        line.price_unit = line.purchase_price + line.margin_edit
 
 
 class SaleOrderLine(models.Model):
@@ -67,16 +66,13 @@ class SaleOrderLine(models.Model):
                                digits=dp.get_precision('Product Price'))
 
     margin_lock = fields.Boolean(string="Lock margin", default=False,
-                                 help="When update manually, lock the margin to block "
-                                      "update by global margin.")
+                                 help="Don't be affect by global marge.")
 
     @api.onchange('margin_edit', 'purchase_price')
     def margin_edit_change(self):
-        self.margin_lock = bool(self.product_id)
         self.price_unit = self.purchase_price + self.margin_edit
         self._product_margin()
 
     @api.onchange('price_unit')
     def price_unit_margin_change(self):
         self.margin_edit = self.price_unit - self.purchase_price
-        self._product_margin()
