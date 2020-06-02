@@ -66,67 +66,17 @@ class SaleOrderLine(models.Model):
     margin_edit = fields.Float(string="Margin ($)",
                                digits=dp.get_precision('Product Price'))
 
-    margin_percent_edit = fields.Float(string="Margin (%)",
-                                       digits=dp.get_precision('Product Price'))
-
     margin_lock = fields.Boolean(string="Lock margin", default=False,
                                  help="When update manually, lock the margin to block "
                                       "update by global margin.")
 
-    # margin_focus_percent_lock = fields.Boolean(
-    #     string="Lock margin on percent", default=True,
-    #     help="Base on percent margin when update other fields. "
-    #          "Set it true when last change value is margin_percent.")
-
-    @api.onchange('margin_edit')
+    @api.onchange('margin_edit', 'purchase_price')
     def margin_edit_change(self):
-        # self.margin_focus_percent_lock = False
         self.margin_lock = bool(self.product_id)
         self.price_unit = self.purchase_price + self.margin_edit
-        if self.purchase_price:
-            self.margin_percent_edit = ((self.purchase_price + self.margin_edit) / \
-                                        self.purchase_price - 1) * 100
-        else:
-            self.margin_percent_edit = 999999
-        # self._product_margin()
-
-    @api.onchange('margin_percent_edit')
-    def margin_percent_change(self):
-        # self.margin_focus_percent_lock = True
-        self.margin_lock = bool(self.product_id)
-        self.margin_edit = self.margin_percent_edit / 100. * self.purchase_price
-        self.price_unit = self.purchase_price + self.margin_edit
-        # self._product_margin()
-
-    @api.onchange('purchase_price')
-    def purchase_price_margin_change(self):
-        # if self.purchase_price:
-        #     self.margin_percent_edit = ((self.purchase_price + self.margin_edit) / \
-        #                                 self.purchase_price - 1) * 100
-        # else:
-        #     self.margin_percent_edit = 999999
-        self.margin_edit = self.margin_percent_edit / 100. * self.purchase_price
-        # if self.margin_focus_percent_lock:
-        #     self.margin_edit = self.margin_percent_edit / 100. * self.purchase_price
-        # elif self.purchase_price:
-        #     self.margin_percent_edit = ((self.purchase_price + self.margin_edit) / \
-        #                                 self.purchase_price - 1) * 100
-        # else:
-        #     self.margin_percent_edit = 999999
-
-        self.price_unit = self.purchase_price + self.margin_edit
-
         self._product_margin()
 
     @api.onchange('price_unit')
     def price_unit_margin_change(self):
-        # if self.margin_focus_percent_lock:
-        #     self.margin_edit = self.price_unit / self.purchase_price - 1
-        # else:
-        #     self.margin_edit = self.price_unit - self.purchase_price
         self.margin_edit = self.price_unit - self.purchase_price
-        if self.purchase_price:
-            self.margin_percent_edit = (self.price_unit / self.purchase_price - 1) * 100
-        else:
-            self.margin_percent_edit = 999999
         self._product_margin()

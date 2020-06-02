@@ -31,7 +31,6 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='order_line']/tree//field[@name='price_unit']" position="after">
                 <field name="margin_edit" groups="sale_margin_security.group_sale_margin_security"/>
-                <field name="margin_percent_edit" groups="sale_margin_security.group_sale_margin_security"/>
                 <field name="margin_lock" groups="sale_margin_security.group_sale_margin_security"/>
             </xpath>
         </field>
