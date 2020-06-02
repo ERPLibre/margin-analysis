@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sale_order_margin_percent_form" model="ir.ui.view">
+        <field name="name">view.sale.order.margin.percent.form</field>
+        <field name="model">sale.order</field>
+        <field name='inherit_id' ref='sale_margin.sale_margin_sale_order'/>
+        <field name="arch" type="xml">
+            <field name="payment_term_id" position="after">
+                <field name="margin_global_edit" groups="sale_margin_security.group_sale_margin_security"/>
+                <field name="margin_global_product" groups="sale_margin_security.group_sale_margin_security"/>
+                <field name="margin_global_service" groups="sale_margin_security.group_sale_margin_security"/>
+            </field>
+        </field>
+    </record>
+
+    <!--        <record model="ir.ui.view" id="sale_margin_sale_order_line">-->
+    <!--            <field name="name">sale.order.line.margin.view.form</field>-->
+    <!--            <field name="model">sale.order</field>-->
+    <!--            <field name="inherit_id" ref="sale.view_order_form"/>-->
+    <!--            <field name="arch" type="xml">-->
+    <!--                <xpath expr="//field[@name='order_line']/form//field[@name='price_unit']" position="after">-->
+    <!--                    <field name="margin_edit" groups="sale_margin_security.group_sale_margin_security"/>-->
+    <!--                </xpath>-->
+    <!--            </field>-->
+    <!--        </record>-->
+
+    <record model="ir.ui.view" id="sale_margin_sale_order_line_form">
+        <field name="name">sale.order.line.tree.margin.view.form</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='order_line']/tree//field[@name='price_unit']" position="after">
+                <field name="margin_edit" groups="sale_margin_security.group_sale_margin_security"/>
+                <field name="margin_lock" groups="sale_margin_security.group_sale_margin_security"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
