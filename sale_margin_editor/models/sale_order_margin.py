@@ -73,6 +73,10 @@ class SaleOrderLine(models.Model):
         self.price_unit = self.purchase_price + self.margin_edit
         self._product_margin()
 
+    # @api.onchange('product_uom_qty')
+    # def margin_total_change(self):
+    #     self.order_id._product_margin()
+
     @api.onchange('price_unit')
     def price_unit_margin_change(self):
         self.margin_edit = self.price_unit - self.purchase_price
