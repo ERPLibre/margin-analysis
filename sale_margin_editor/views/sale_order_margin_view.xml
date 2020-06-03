@@ -9,6 +9,7 @@
                 <field name="margin_global_edit" groups="sale_margin_security.group_sale_margin_security"/>
                 <field name="margin_global_product" groups="sale_margin_security.group_sale_margin_security"/>
                 <field name="margin_global_service" groups="sale_margin_security.group_sale_margin_security"/>
+                <field name="margin_switch_method" groups="sale_margin_security.group_sale_margin_security"/>
             </field>
         </field>
     </record>
@@ -19,7 +20,7 @@
     <!--            <field name="inherit_id" ref="sale.view_order_form"/>-->
     <!--            <field name="arch" type="xml">-->
     <!--                <xpath expr="//field[@name='order_line']/form//field[@name='price_unit']" position="after">-->
-    <!--                    <field name="margin_edit" groups="sale_margin_security.group_sale_margin_security"/>-->
+    <!--                    <field name="margin_monetary" groups="sale_margin_security.group_sale_margin_security"/>-->
     <!--                </xpath>-->
     <!--            </field>-->
     <!--        </record>-->
@@ -30,12 +31,12 @@
         <field name="inherit_id" ref="sale_margin.sale_margin_sale_order_line_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='order_line']/tree//field[@name='price_unit']" position="after">
-                <field name="margin_edit" groups="sale_margin_security.group_sale_margin_security"/>
+                <field name="margin_monetary" groups="sale_margin_security.group_sale_margin_security"/>
                 <field name="margin_lock" groups="sale_margin_security.group_sale_margin_security"/>
             </xpath>
             <xpath expr="//field[@name='order_line']/tree" position="attributes">
-                <attribute name="decoration-danger">margin_edit&lt;0</attribute>
-                <attribute name="decoration-warning">margin_edit==0</attribute>
+                <attribute name="decoration-danger">margin_monetary&lt;0</attribute>
+                <attribute name="decoration-warning">margin_monetary==0</attribute>
             </xpath>
         </field>
     </record>
