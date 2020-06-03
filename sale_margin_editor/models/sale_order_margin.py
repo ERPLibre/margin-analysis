@@ -35,7 +35,7 @@ class SaleOrder(models.Model):
         has_change = False
         for line in self.order_line:
             if line.product_id.type != "service" and not line.margin_lock:
-                self._update_line_margin_edit(line)
+                self._update_line_margin_edit(line, self.margin_global_product)
                 has_change = True
         if not ignore_update_sale_margin and has_change:
             self._product_margin()
@@ -45,13 +45,13 @@ class SaleOrder(models.Model):
         has_change = False
         for line in self.order_line:
             if line.product_id.type == "service" and not line.margin_lock:
-                self._update_line_margin_edit(line)
+                self._update_line_margin_edit(line, self.margin_global_service)
                 has_change = True
             if not ignore_update_sale_margin and has_change:
                 self._product_margin()
 
-    def _update_line_margin_edit(self, line):
-        marge_percent = self.margin_global_product / 100
+    def _update_line_margin_edit(self, line, marge):
+        marge_percent = marge / 100
         if line.purchase_price:
             line.margin_edit = marge_percent * line.purchase_price
         else:
@@ -75,7 +75,9 @@ class SaleOrderLine(models.Model):
 
     # @api.onchange('product_uom_qty')
     # def margin_total_change(self):
+    #     self._product_margin()
     #     self.order_id._product_margin()
+    #     print(self.order_id.margin)
 
     @api.onchange('price_unit')
     def price_unit_margin_change(self):

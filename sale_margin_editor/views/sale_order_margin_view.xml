@@ -33,6 +33,10 @@
                 <field name="margin_edit" groups="sale_margin_security.group_sale_margin_security"/>
                 <field name="margin_lock" groups="sale_margin_security.group_sale_margin_security"/>
             </xpath>
+            <xpath expr="//field[@name='order_line']/tree" position="attributes">
+                <attribute name="decoration-danger">margin_edit&lt;0</attribute>
+                <attribute name="decoration-warning">margin_edit==0</attribute>
+            </xpath>
         </field>
     </record>
 
