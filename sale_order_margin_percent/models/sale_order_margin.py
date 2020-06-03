@@ -15,7 +15,7 @@ class SaleOrder(models.Model):
     @api.depends('margin', 'amount_untaxed')
     def _compute_percent(self):
         for order in self:
-            if order.margin and order.amount_untaxed > 0:
+            if order.margin and order.amount_untaxed != 0:
                 order.percent = (order.margin / order.amount_untaxed) * 100
             else:
                 order.percent = 0
@@ -30,7 +30,7 @@ class SaleOrderLine(models.Model):
     @api.depends('margin', 'price_subtotal')
     def _compute_margin_percent(self):
         for line in self:
-            if line.price_subtotal and line.margin > 0:
+            if line.price_subtotal and line.margin != 0:
                 line.margin_percent = (line.margin / line.price_subtotal) * 100.
             else:
                 line.margin_percent = 0
