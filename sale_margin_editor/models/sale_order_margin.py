@@ -20,16 +20,16 @@ class SaleOrder(models.Model):
         digits=dp.get_precision('Product Price'),
         help="Update service margin only. Set to 0 to resume global updating effect.")
     margin_switch_method = fields.Selection(selection=[
-        ('0', _('Percent')),
-        ('1', _('Monetary')),
-    ], string='Switch Method Margin', default='0', required=True)
+        ('Percent', _('Percent')),
+        ('Monetary', _('Monetary')),
+    ], string='Switch Method Margin', default='Percent', required=True)
 
     @api.onchange('margin_global_edit')
     def margin_monetary_change(self):
         if self.margin_global_edit >= 100:
-            self.margin_global_edit = 99.9
+            self.margin_global_edit = 99.99
         elif self.margin_global_edit <= -100:
-            self.margin_global_edit = -99.9
+            self.margin_global_edit = -99.99
 
         self.margin_global_product = self.margin_global_edit
         self.margin_product_edit_change(ignore_update_sale_margin=True)
@@ -60,9 +60,11 @@ class SaleOrder(models.Model):
     def _update_line_margin_monetary(self, line, marge):
         marge_percent = marge / 100
         if line.purchase_price:
-            line.margin_monetary = marge_percent * line.purchase_price
-            line.margin_monetary = (marge_percent * line.purchase_price) / (1 - marge_percent)
-
+            if marge_percent != 1:
+                line.margin_monetary = (marge_percent * line.purchase_price) / (
+                    1 - marge_percent)
+            else:
+                line.margin_monetary = 0
         else:
             line.margin_monetary = marge_percent
         line.price_unit = line.purchase_price + line.margin_monetary
@@ -79,19 +81,20 @@ class SaleOrderLine(models.Model):
 
     @api.onchange('purchase_price')
     def margin_purchase_price_change(self):
-        if self.order_id.margin_switch_method == '0':
+        if self.order_id.margin_switch_method == 'Percent':
             # Percent
             if self.margin_lock:
-                line_margin_percent = (self.margin_monetary / self.price_unit)
-                self.price_unit = self._price_unit_calc(line_margin_percent)
+                if not self.price_unit:
+                    margin_percent = 0
+                else:
+                    margin_percent = (self.margin_monetary / self.price_unit)
             else:
                 if self.product_id.type == "service":
-                    line_margin_percent = self.order_id.margin_global_service / 100
-                    self.price_unit = self._price_unit_calc(line_margin_percent)
+                    margin_percent = self.order_id.margin_global_service / 100
                 else:
-                    line_margin_percent = self.order_id.margin_global_product / 100
-                    self.price_unit = self._price_unit_calc(line_margin_percent)
-        elif self.order_id.margin_switch_method == '1':
+                    margin_percent = self.order_id.margin_global_product / 100
+            self.price_unit = self._price_unit_calc(margin_percent, self.purchase_price)
+        elif self.order_id.margin_switch_method == 'Monetary':
             # Monetary
             self.price_unit = self.purchase_price + self.margin_monetary
         else:
@@ -106,6 +109,11 @@ class SaleOrderLine(models.Model):
     def price_unit_margin_change(self):
         self.margin_monetary = self.price_unit - self.purchase_price
 
-    def _price_unit_calc(self, line_margin_percent):
-       new_margin_monetary = (line_margin_percent * self.purchase_price) / (1 - line_margin_percent)
-       self.price_unit = new_margin_monetary / line_margin_percent
+    @staticmethod
+    def _price_unit_calc(margin_percent, purchase_price):
+        if not margin_percent:
+            return 0.
+        if margin_percent == 1:
+            margin_percent = 0.99
+        new_margin_monetary = (margin_percent * purchase_price) / (1 - margin_percent)
+        return new_margin_monetary / margin_percent
