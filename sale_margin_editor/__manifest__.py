@@ -10,6 +10,7 @@
     "installable": True,
     "depends": [
         'sale_margin',
+        'sale_order_margin_percent',
         'sale_margin_security',
     ],
     "data": [
