@@ -49,8 +49,9 @@ class TestSaleMarginEditor(common.SavepointCase):
 
         # Update global value
         sale_order.margin_global_edit = 15.0
+        sale_order.margin_monetary_change()
 
-        self.assertEqual(order_line.price_unit, 20.0)
+        self.assertEqual(order_line.margin_percent, 15.0)
 
         # self.assertEqual(order_line.margin_delivered, 60.0)
         # self.assertEqual(order_line.margin_delivered_percent, 50.0)
