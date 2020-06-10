@@ -114,6 +114,6 @@ class SaleOrderLine(models.Model):
         if not margin_percent:
             return 0.
         if margin_percent == 1:
-            margin_percent = 0.99
+            margin_percent = 0.9999999
         new_margin_monetary = (margin_percent * purchase_price) / (1 - margin_percent)
         return new_margin_monetary / margin_percent
