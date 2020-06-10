@@ -30,7 +30,7 @@
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale_margin.sale_margin_sale_order_line_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='order_line']/tree//field[@name='price_unit']" position="after">
+            <xpath expr="//field[@name='order_line']/tree//field[@name='purchase_price']" position="after">
                 <field name="margin_monetary" groups="sale_margin_security.group_sale_margin_security"/>
                 <field name="margin_lock" groups="sale_margin_security.group_sale_margin_security"/>
             </xpath>
