@@ -49,7 +49,7 @@
             <xpath expr="//field[@name='order_line']/tree//field[@name='margin_percent']" position="attributes">
                 <attribute name="invisible">1</attribute>
             </xpath>
-            <xpath expr="//field[@name='order_line']/tree//field[@name='margin_percent']" position="after">
+            <xpath expr="//field[@name='order_line']/tree//field[@name='margin_monetory']" position="before">
                 <field name="margin_percent_edit"/>
             </xpath>
         </field>
