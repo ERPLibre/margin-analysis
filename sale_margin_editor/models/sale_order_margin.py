@@ -39,6 +39,11 @@ class SaleOrder(models.Model):
 
     @api.onchange('margin_global_product')
     def margin_product_edit_change(self, ignore_update_sale_margin=False):
+        if self.margin_global_product >= 100:
+            self.margin_global_product = 99.99
+        elif self.margin_global_product <= -100:
+            self.margin_global_product = -99.99
+
         has_change = False
         for line in self.order_line:
             if line.product_id.type != "service" and not line.margin_lock:
@@ -49,6 +54,11 @@ class SaleOrder(models.Model):
 
     @api.onchange('margin_global_service')
     def margin_service_edit_change(self, ignore_update_sale_margin=False):
+        if self.margin_global_service >= 100:
+            self.margin_global_service = 99.99
+        elif self.margin_global_service <= -100:
+            self.margin_global_service = -99.99
+
         has_change = False
         for line in self.order_line:
             if line.product_id.type == "service" and not line.margin_lock:
@@ -63,8 +73,10 @@ class SaleOrder(models.Model):
             if marge_percent != 1:
                 line.margin_monetary = (marge_percent * line.purchase_price) / (
                     1 - marge_percent)
+                line.margin_percent_edit = marge_percent * 100.
             else:
                 line.margin_monetary = 0
+                line.margin_percent_edit = 0
         else:
             line.margin_monetary = marge_percent
         line.price_unit = line.purchase_price + line.margin_monetary
@@ -78,6 +90,8 @@ class SaleOrderLine(models.Model):
 
     margin_lock = fields.Boolean(string="Lock margin", default=False,
                                  help="Don't be affected by global margin.")
+
+    margin_percent_edit = fields.Float(string="Margin (%)")
 
     @api.onchange('purchase_price')
     def margin_purchase_price_change(self):
@@ -99,6 +113,15 @@ class SaleOrderLine(models.Model):
             self.price_unit = self.purchase_price + self.margin_monetary
         else:
             raise ValueError(_("Unknown value of margin_switch_method"))
+
+    @api.onchange('margin_percent_edit')
+    def margin_percent_edit_change(self):
+        self.price_unit = self._price_unit_calc(self.margin_percent_edit / 100,
+                                                self.purchase_price)
+
+    @api.onchange('margin_percent')
+    def margin_percent_change(self):
+        self.margin_percent_edit = self.margin_percent
 
     @api.onchange('margin_monetary')
     def margin_monetary_change(self):
