@@ -41,4 +41,18 @@
         </field>
     </record>
 
+    <record model="ir.ui.view" id="sale_margin_sale_order_line_percent_form">
+        <field name="name">sale.order.line.tree.margin.view.form</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale_order_margin_percent.sale_margin_sale_order_line_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='order_line']/tree//field[@name='margin_percent']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/tree//field[@name='margin_percent']" position="after">
+                <field name="margin_percent_edit"/>
+            </xpath>
+        </field>
+    </record>
+
 </odoo>
